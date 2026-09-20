@@ -296,6 +296,14 @@ Base class ของไอเทมทั้งหมด
 ### รายละเอียดโจทย์
 ในข้อสอบนี้ นักศึกษาจะต้อง **นำ Algorithm การเรียงลำดับ มาประยุกต์ใช้กับ Doubly Linked List (`LinkedList<int>`)** ซึ่งเป็นโจทย์ที่ท้าทายและทดสอบความเข้าใจลึกซึ้งในการจัดการ Node และ Pointer ในหน่วยความจำ
 
+> [!IMPORTANT]
+> **กฎเกณฑ์ข้อบังคับสำหรับการทำ Problem 02 (Mandatory Rule):**
+> - นักศึกษา**ต้องเลือกใช้อัลกอริทึมการเรียงลำดับ 1 ใน 3 อัลกอริทึม** ที่ได้เรียนในวิชานี้เท่านั้น ได้แก่:
+>   1. **Bubble Sort**
+>   2. **Selection Sort**
+>   3. **Insertion Sort**
+> - ❌ **ข้อห้ามเด็ดขาด:** ไม่อนุญาตให้ใช้ Built-in Methods หรือ C# Libraries สำเร็จรูป เช่น LINQ (`OrderBy`, `OrderByDescending`), `Array.Sort()`, `List<T>.Sort()` หรือการแปลง `LinkedList` เป็น `List`/`Array` เพื่อ Sort ผ่านฟังก์ชันสำเร็จรูปของภาษาแล้วแปลงกลับ หากตรวจพบโค้ดในลักษณะนี้จะถือว่าผิดวัตถุประสงค์การสอบ และจะไม่ได้รับคะแนนในข้อนี้
+
 ให้นักศึกษาเปิดไฟล์ `Assets/Midterm Exam/Prob02-Sorting/LinkedListSorter.cs` ใน namespace `MidtermExam.Prob02` และ Implement 2 methods:
 
 ```csharp
@@ -322,18 +330,22 @@ namespace MidtermExam.Prob02
 
 ---
 
-### แนวทางการแก้ปัญหา (Algorithmic Approaches)
-นักศึกษาสามารถเลือกวิธีการเรียงลำดับ Linked List ด้วยวิธีใดวิธีหนึ่งตามความถนัด เช่น:
+### แนวทางการแก้ปัญหาด้วย 3 Sorting Algorithms (Algorithmic Approaches)
+นักศึกษาสามารถเลือก Algorithm ใด Algorithm หนึ่งจาก 3 รูปแบบตามความถนัด:
 
-1. **วิธี Node Value Swapping (Bubble Sort / Selection Sort on Nodes):**
-   - วน Loop โหนดนอก `LinkedListNode<int> i = list.First`
-   - วน Loop โหนดใน `LinkedListNode<int> j = i.Next` จนถึง `null`
-   - เปรียบเทียบ `i.Value` และ `j.Value` หากผิดลำดับ ให้สลับค่า (Swap) ระหว่าง `i.Value` กับ `j.Value`
-2. **วิธี Rebuilding / Insertion Sort ด้วย Linked List ใหม่:**
+1. **Selection Sort บน LinkedList:**
+   - วน Loop โหนดหลัก `LinkedListNode<int> i = list.First`
+   - วน Loop โหนดเปรียบเทียบ `LinkedListNode<int> j = i.Next` จนถึง `null` เพื่อหาโหนดที่มีค่าน้อยที่สุด (กรณี Ascending) หรือมากที่สุด (กรณี Descending)
+   - สลับค่า (Swap) ระหว่าง `i.Value` และโหนดที่ค้นพบ
+2. **Bubble Sort บน LinkedList:**
+   - วน Loop ตรวจสอบคู่โหนดที่อยู่ติดกันซ้ำๆ ตั้งแต่ `list.First` จนถึงปลายคิว
+   - เปรียบเทียบ `current.Value` และ `current.Next.Value` หากเรียงผิดลำดับให้สลับค่า (Swap) ระหว่างกัน
+   - ทำซ้ำจนกระทั่งไม่มีคู่ใดต้องสลับอีก (Sorted สมบูรณ์)
+3. **Insertion Sort บน LinkedList:**
    - สร้าง `LinkedList<int> sortedList = new LinkedList<int>()`
-   - ดึงตัวเลขจาก `list` ทีละตัว แล้วนำไปแทรกใน `sortedList` ให้ถูกตำแหน่งโดยใช้ `AddBefore` หรือ `AddLast`
-3. **ข้อควรระวัง (Edge Cases):**
-   - กรณี `list == null` หรือ `list.Count <= 1` ไม่จำเป็นต้องเรียงลำดับ สามารถ Return ค่ากลับได้ทันที
+   - วน Loop ดึงตัวเลขจาก `list` เดิมทีละตัว แล้วนำไปแทรกใน `sortedList` ให้ถูกตำแหน่งโดยใช้ `AddBefore` หรือ `AddLast`
+4. **ข้อควรระวังสำหรับ Edge Cases:**
+   - หาก `list == null` หรือ `list.Count <= 1` ไม่จำเป็นต้องเรียงลำดับ สามารถ Return คืนค่ากลับได้ทันที
 
 ---
 

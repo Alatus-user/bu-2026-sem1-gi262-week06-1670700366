@@ -550,17 +550,17 @@ flowchart TD
 
 คะแนนรวมทั้งสิ้น: **100 คะแนน** (แบ่งออกเป็น 3 ข้อใหญ่)
 
-- **Problem 01: OOP & Class Diagram (40 คะแนน)**
+- **Problem 01: OOP & Class Diagram (5 คะแนน)**
   - **Class Existence & Compilation:** สร้างครบ 11 คลาส และโปรเจกต์ Compile ผ่านไม่มี Error
   - **Inheritance Hierarchy:** ความสัมพันธ์การสืบทอดคลาสถูกต้องตาม Diagram ทุกระดับ
   - **Access Modifiers & Member Types:** กำหนด `public`, `protected`, `private` และ Data types ของ fields/methods ถูกต้อง
   - **Virtual & Override Usage:** มีการใช้ `virtual` ใน Base Class และ `override` ใน Derived Class ครบถ้วนตามสเปก
 
-- **Problem 02: LinkedList Sorting (40 คะแนน)**
-  - **SortAscending Correctness (20 คะแนน):** จัดเรียงลำดับจากน้อยไปมากถูกต้องตาม Test Cases
-  - **SortDescending Correctness (20 คะแนน):** จัดเรียงลำดับจากมากไปน้อยถูกต้องตาม Test Cases
+- **Problem 02: LinkedList Sorting (5 คะแนน)**
+  - **SortAscending Correctness:** จัดเรียงลำดับจากน้อยไปมากถูกต้องตาม Test Cases
+  - **SortDescending Correctness:** จัดเรียงลำดับจากมากไปน้อยถูกต้องตาม Test Cases
 
-- **Problem 03: Turn-Based Queue Manipulation (20 คะแนน)**
+- **Problem 03: Turn-Based Queue Manipulation (5 คะแนน)**
   - พัฒนาเมธอด `SwapQueue` สำหรับจัดการลำดับคิวในระบบ Turn-based ด้วย Doubly Linked List ได้อย่างถูกต้อง ครอบคลุมเงื่อนไข Edge Cases และรักษาความสมบูรณ์ของ Pointer สองทิศทาง (`Next` และ `Previous`) ครบถ้วนตาม Test Cases
 
 > [!NOTE]

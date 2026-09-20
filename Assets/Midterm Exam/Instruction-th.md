@@ -15,17 +15,22 @@
 2. **Data Structures & Algorithms (LinkedList & Sorting):**
    - เข้าใจโครงสร้างและการทำงานของ `LinkedList<T>` และ `LinkedListNode<T>`
    - สามารถนำ Algorithm การเรียงลำดับ (Sorting) เช่น Bubble Sort, Selection Sort หรือ Insertion Sort มาประยุกต์ใช้กับโหนดของ Linked List ได้จริง
+3. **LinkedList Node Manipulation & Game Queue Logic:**
+   - เข้าใจการประยุกต์ใช้ Doubly Linked List กับระบบจัดการคิวเทิร์น (Turn-Based Queue) ในเกม
+   - สามารถค้นหา โยกย้าย ถอดถอน (Remove) และแทรกโหนด (Insert/AddAfter) ในตำแหน่งที่ถูกต้อง
+   - จัดการ Edge Cases และรักษาความสมบูรณ์ของ Pointer สองทิศทาง (`Next` และ `Previous`) ของ Doubly Linked List
 
 ---
 
 ## 📚 โครงสร้างของข้อสอบ (Exam Structure)
 
-ข้อสอบมีทั้งหมด **2 ข้อใหญ่**:
+ข้อสอบมีทั้งหมด **3 ข้อใหญ่**:
 
 | ข้อที่ | หัวข้อ | ตำแหน่งโฟลเดอร์ | รายละเอียด |
 | :--- | :--- | :--- | :--- |
 | **Problem 01** | OOP & Class Diagram Implementation | `Assets/Midterm Exam/Prob01-ClassDiagram/` | นำ Class Diagram ระบบตัวละครและอุปกรณ์ในเกม (11 Classes) มาเขียนโค้ดตามโครงสร้าง ตัวแปร และ Access Modifiers ที่กำหนด |
 | **Problem 02** | LinkedList Sorting Algorithm | `Assets/Midterm Exam/Prob02-Sorting/` | เขียน Algorithm เรียงลำดับข้อมูลตัวเลขจำนวนเต็ม (`LinkedList<int>`) ทั้งจากน้อยไปมาก และจากมากไปน้อย |
+| **Problem 03** | Turn-Based Queue Manipulation | `Assets/Midterm Exam/Prob03-TurnQueue/` | พัฒนาระบบจัดการคิวเทิร์นด้วย `LinkedList<Player>` และเขียนเมธอด `SwapQueue` สำหรับสลับลำดับการเล่นของตัวละครในเกม |
 
 ---
 
@@ -380,20 +385,174 @@ namespace MidtermExam.Prob02
 | `TC23_Extreme_LargeList_500Elements` | ข้อมูลขนาดใหญ่ 500 โหนด เรียงกลับหลัง (500 ถึง 1) | `[500, 499, ..., 2, 1]` | ทดสอบ Stress test ป้องกัน Stack Overflow / Infinite Loop |
 | `TC24_Extreme_RandomElements_300Elements` | ข้อมูลสุ่ม 300 จำนวน ช่วง [-5000, 5000] | สุ่ม 300 จำนวน (Seed 2026 คงที่) | ทดสอบความถูกต้องของ Pointer ทั้ง Forward (`Next`) และ Backward (`Previous`) |
 
+
+---
+
+## ⚔️ Problem 03: Turn-Based Queue Manipulation with LinkedList
+
+### ความเป็นมาและขอบเขตเนื้อหา
+ในเกมแนว Turn-Based RPG (เช่น Final Fantasy, Pokémon, Honkai: Star Rail) ลำดับการออกคำสั่งและการเคลื่อนไหวของตัวละครมักถูกควบคุมด้วยระบบ **Action Queue** หรือ **Turn Order** 
+โครงสร้างข้อมูลที่เหมาะสมที่สุดในการจัดการคิวแบบนี้คือ **Doubly Linked List (`LinkedList<Player>`)** เนื่องจาก:
+- ผู้เล่นที่เป็นโหนดแรกสุด (`list.First`) คือผู้ที่กำลังได้เล่นเทิร์นปัจจุบัน
+- ผู้เล่นที่เป็นโหนดสุดท้าย (`list.Last`) คือผู้เล่นลำดับสุดท้ายของรอบ
+- เมื่อผู้เล่นจบเทิร์น ระบบจะนำผู้เล่นคนแรกย้ายไปต่อท้ายคิว (`RemoveFirst()` แล้ว `AddLast()`) เพื่อวนรอบต่อไป
+- ผู้เล่นสามารถใช้ **สกิลพิเศษแทรกแซงลำดับคิว (Turn Manipulation Ability)** เพื่อดึงเพื่อนร่วมทีมขึ้นมาเล่นก่อน หรือผลักศัตรูให้ไปเล่นทีหลังได้ทันที ด้วยความเร็วในการแทรกและถอดโหนดระดับ $O(1)$ เมื่อทราบ Pointer ของโหนด
+
+---
+
+### รายละเอียดโจทย์
+
+ให้นักศึกษาเปิดโฟลเดอร์ `Assets/Midterm Exam/Prob03-TurnQueue/` จะพบกับคลาส `Player.cs` ภายใน namespace `MidtermExam.Prob03`
+
+คลาส `Player` ประกอบด้วย 2 เมธอดหลัก:
+1. **`public void Attack(Player target)`**: เมธอดจำลองการโจมตีเป้าหมาย (ลด Health ของเป้าหมาย 10 หน่วย) ซึ่งทางโจทย์ได้เขียนโค้ดเตรียมไว้ให้แล้ว เพื่อให้นักศึกษาเห็นภาพการนำไปใช้ในเกมจริง
+2. **`public bool SwapQueue(LinkedList<Player> turnQueue, Player targetPlayer, Player afterPlayer)`**: **(ส่วนที่นักศึกษาต้องเขียน Implementation)** ความสามารถพิเศษในการเปลี่ยนลำดับคิว โดยนำ `targetPlayer` ออกจากตำแหน่งเดิม แล้วนำไปแทรกต่อท้าย `afterPlayer` (AddAfter)
+
+```csharp
+namespace MidtermExam.Prob03
+{
+    public class Player
+    {
+        public string Name;
+        public int Health;
+
+        public Player(string name, int health = 100)
+        {
+            Name = name;
+            Health = health;
+        }
+
+        // เมธอดจำลองการโจมตี (มีโค้ดพร้อมใช้งานแล้ว)
+        public void Attack(Player target)
+        {
+            if (target != null) target.TakeDamage(10);
+        }
+
+        public void TakeDamage(int damage)
+        {
+            Health = System.Math.Max(0, Health - damage);
+        }
+
+        // ข้อ 3.1: สกิลสลับตำแหน่งโหนดใน LinkedList คิวเทิร์น (นักศึกษาต้องเขียนโค้ดนี้)
+        public bool SwapQueue(LinkedList<Player> turnQueue, Player targetPlayer, Player afterPlayer)
+        {
+            // TODO: Implement การย้าย targetPlayer ไปวางต่อท้าย afterPlayer ใน turnQueue
+            return false;
+        }
+    }
+}
+```
+
+---
+
+### ภาพจำลองการทำงาน (Visual Demonstration)
+
+สมมติว่าคิวการเล่นเริ่มต้นมีผู้เล่น 5 คน: `[Player 1] <-> [Player 2] <-> [Player 3] <-> [Player 4] <-> [Player 5]`  
+เมื่อมีผู้เล่นเรียกใช้คำสั่ง: `SwapQueue(turnQueue, Player 4, Player 1)`  
+เป้าหมายคือ: **ถอด `Player 4` ออกจากตำแหน่งเดิม แล้วนำไปแทรกต่อท้าย `Player 1`**
+
+```mermaid
+flowchart TD
+    subgraph Before["1. คิวเริ่มต้นก่อนสลับ (Initial Queue)"]
+        A1["Player 1 (Head)"] <--> A2["Player 2"] <--> A3["Player 3"] <--> A4["Player 4 (Target)"] <--> A5["Player 5 (Tail)"]
+    end
+
+    subgraph Step["2. ทำการ Remove Player 4 แล้ว AddAfter ต่อท้าย Player 1"]
+        direction TB
+        B1["ถอด Player 4 ออกจากคิว -> Player 3 เชื่อมต่อไปยัง Player 5"]
+        B2["แทรก Player 4 ไว้ข้างหลัง Player 1 -> Player 1 เชื่อมต่อไปยัง Player 4 และ Player 4 เชื่อมต่อไปยัง Player 2"]
+    end
+
+    subgraph After["3. คิวผลลัพธ์หลังสลับ (Resulting Queue)"]
+        C1["Player 1 (Head)"] <--> C4["Player 4 (Moved)"] <--> C2["Player 2"] <--> C3["Player 3"] <--> C5["Player 5 (Tail)"]
+    end
+
+    Before --> Step --> After
+```
+
+---
+
+### ข้อกำหนดและกรณีขอบเขตที่ต้องตรวจสอบ (Specifications & Edge Cases)
+
+เมธอด `SwapQueue` ต้องคืนค่า `bool` เพื่อระบุว่าการสลับคิวทำได้สำเร็จหรือไม่ โดยมีกฎเกณฑ์ดังนี้:
+
+1. **การตรวจสอบความถูกต้องของข้อมูลนำเข้า (Validation Checks):**
+   - หาก `turnQueue == null` ให้คืนค่า `false` ทันที
+   - หาก `targetPlayer == null` หรือ `afterPlayer == null` ให้คืนค่า `false` ทันที
+   - หากคิวมีสมาชิกน้อยกว่า 2 โหนด (`turnQueue.Count < 2`) ให้คืนค่า `false` ทันที (ไม่สามารถสลับได้)
+   - หาก `targetPlayer == afterPlayer` (พยายามนำผู้เล่นไปวางต่อท้ายตัวเอง) ให้คืนค่า `false` ทันที
+   - หาก `targetPlayer` หรือ `afterPlayer` ไม่ได้อยู่ใน `turnQueue` ให้คืนค่า `false` ทันที
+
+2. **กรณีผู้เล่นอยู่ในตำแหน่งที่ถูกต้องอยู่แล้ว (Already In Position):**
+   - หาก `targetPlayer` อยู่ต่อท้าย `afterPlayer` อยู่แล้วในคิว ให้ถือว่าการสลับสำเร็จและคืนค่า `true` โดยลำดับของคิวต้องคงเดิม
+
+3. **การจัดการโหนดและพอยน์เตอร์ (Node & Pointer Integrity):**
+   - ต้องถอดโหนด `targetPlayer` ออกจากตำแหน่งเดิมอย่างถูกต้อง (`turnQueue.Remove(...)`)
+   - นำโหนด `targetPlayer` ไปแทรกต่อท้ายโหนด `afterPlayer` (`turnQueue.AddAfter(...)`)
+   - กรณีที่ `targetPlayer` เป็นหัวคิวเดิม (`First`): หัวคิวใหม่ (`turnQueue.First`) ต้องเปลี่ยนเป็นโหนดถัดไปอย่างถูกต้อง และ `First.Previous` ต้องเป็น `null`
+   - กรณีที่ `targetPlayer` เป็นท้ายคิวเดิม (`Last`): ท้ายคิวใหม่ (`turnQueue.Last`) ต้องเปลี่ยนเป็นโหนดก่อนหน้าอย่างถูกต้อง และ `Last.Next` ต้องเป็น `null`
+   - กรณีที่ `afterPlayer` เป็นท้ายคิวเดิม (`Last`): เมื่อแทรก `targetPlayer` ต่อท้าย `afterPlayer` แล้ว `targetPlayer` ต้องกลายเป็นท้ายคิวคนใหม่ (`turnQueue.Last`)
+   - โครงสร้าง Doubly Linked List ต้องมีความสมบูรณ์ 100% ทั้งการท่องไปข้างหน้า (`.Next`) และการท่องย้อนกลับ (`.Previous`)
+
+---
+
+### รายการ Test Cases สำหรับ Problem 03 (`Prob03_TurnQueue_Testcase.cs`)
+
+แบบทดสอบในไฟล์ `Assets/Midterm Exam/Tests/Prob03_TurnQueue_Testcase.cs` มีทั้งหมด **12 Test Cases** แบ่งออกเป็น 4 หมวดหมู่ ครอบคลุมทุกสถานการณ์อย่างกระชับและครบถ้วน:
+
+#### หมวดที่ 1: Validation & Edge Cases (TC01 ถึง TC03)
+
+| Test Case Method Name | คำอธิบายกรณีทดสอบ | ข้อมูลนำเข้า | ผลลัพธ์ที่คาดหวัง |
+| :--- | :--- | :--- | :--- |
+| `TC01_Validation_NullInputs_ReturnsFalse` | ตรวจสอบ Arguments เป็น null ทั้ง 3 กรณี | `queue == null`, `target == null`, หรือ `after == null` | คืนค่า `false` ทุกกรณี ไม่ throw Exception และคิวไม่ถูกแก้ไข |
+| `TC02_Validation_PlayerNotInQueue_ReturnsFalse` | ตรวจสอบผู้เล่นไม่อยู่ในคิว | `targetPlayer` หรือ `afterPlayer` ไม่อยู่ในคิว | คืนค่า `false` ทั้ง 2 กรณี และคิวคงเดิม |
+| `TC03_Validation_SelfTargetAndSmallQueue_ReturnsFalse` | วางต่อท้ายตัวเอง หรือคิวมีคนไม่พอ | `target == after` หรือ คิวขนาด 1 คน | คืนค่า `false` ทั้ง 2 กรณี |
+
+#### หมวดที่ 2: Queue Swapping Scenarios (TC04 ถึง TC07)
+
+| Test Case Method Name | คำอธิบายกรณีทดสอบ | ข้อมูลก่อนสลับ | ผลลัพธ์คิวหลังสลับ |
+| :--- | :--- | :--- | :--- |
+| `TC04_Swap_PromptExample_MovePlayer4AfterPlayer1` | ตัวอย่างตามโจทย์: ย้าย Player 4 ไปต่อท้าย Player 1 | `[P1, P2, P3, P4, P5]` | `[P1, P4, P2, P3, P5]` คืนค่า `true` |
+| `TC05_Swap_MoveForwardAndBackward` | สลับข้ามตำแหน่ง: หลังมาหน้า (P5 หลัง P2) และ หน้าไปหลัง (P2 หลัง P4) | `[P1, P2, P3, P4, P5]` | ย้ายถูกต้องทั้งสองทิศทาง คืนค่า `true` |
+| `TC06_Swap_AdjacentAndAlreadyInPosition` | สลับคู่ติดกัน (P2 หลัง P3) และกรณีอยู่ถูกตำแหน่งแล้ว | `[P1, P2, P3, P4]` | สลับได้ถูกต้อง และกรณีอยู่ถูกที่แล้วคิวไม่เปลี่ยน คืนค่า `true` |
+| `TC07_Swap_TwoPlayersList` | สลับคิวขนาดเล็กที่สุด 2 คน | `[P1, P2]` -> ย้าย P1 หลัง P2 | `[P2, P1]` คืนค่า `true` |
+
+#### หมวดที่ 3: Boundary & Pointer Integrity (TC08 ถึง TC10)
+
+| Test Case Method Name | คำอธิบายกรณีทดสอบ | สิ่งที่ตรวจสอบเป็นพิเศษ |
+| :--- | :--- | :--- |
+| `TC08_Boundary_MoveHeadAndTail` | ย้ายโหนดหัวคิว (`First`) และย้ายโหนดท้ายคิว (`Last`) ไปไว้ตรงกลาง | `queue.First` และ `queue.Last` อัปเดตถูกต้อง และ `First.Previous == null`, `Last.Next == null` |
+| `TC09_Boundary_MovePlayerToBecomeNewTail` | ย้ายผู้เล่นไปต่อท้าย Last เดิม (กลายเป็น Tail ใหม่) และย้าย Head ไปเป็น Tail | `queue.Last` อัปเดตเป็นคนใหม่อย่างถูกต้องทั้งสองกรณี |
+| `TC10_Integrity_BidirectionalPointers` | ตรวจสอบความสมบูรณ์ของ Pointer สองทิศทางทั้งคิว 6 โหนด | ท่องไปข้างหน้า (`.Next`) และท่องย้อนกลับ (`.Previous`) ต้องสมมาตรและตรงกันทุกตำแหน่ง |
+
+#### หมวดที่ 4: Gameplay Simulation (TC11 ถึง TC12)
+
+| Test Case Method Name | คำอธิบายกรณีทดสอบ | รูปแบบการจำลองในเกม |
+| :--- | :--- | :--- |
+| `TC11_Gameplay_AttackAndTurnCycle` | ตรวจสอบเมธอด `Attack` และการวนเทิร์นใน `TurnManager` | โจมตีลด 10 HP และ `NextTurn()` ย้ายผู้เล่นคนแรกไปต่อท้ายคิวอย่างถูกต้อง |
+| `TC12_Gameplay_TurnQueue_CombatAbilitySimulation` | จำลองสถานการณ์ต่อสู้จริงในเกม Turn-based และการสลับคิวต่อเนื่อง | Hero ใช้ `SwapQueue` ดัน Boss ไปหลัง Warrior -> โจมตี Boss -> `NextTurn()` -> Mage ได้เล่นก่อน Boss |
+
 ---
 
 ## 📋 เกณฑ์การให้คะแนน (Grading Rubric)
 
-- Problem 01: OOP & Class Diagram (50 คะแนน)
+คะแนนรวมทั้งสิ้น: **100 คะแนน** (แบ่งออกเป็น 3 ข้อใหญ่)
+
+- **Problem 01: OOP & Class Diagram (40 คะแนน)**
   - **Class Existence & Compilation:** สร้างครบ 11 คลาส และโปรเจกต์ Compile ผ่านไม่มี Error
   - **Inheritance Hierarchy:** ความสัมพันธ์การสืบทอดคลาสถูกต้องตาม Diagram ทุกระดับ
   - **Access Modifiers & Member Types:** กำหนด `public`, `protected`, `private` และ Data types ของ fields/methods ถูกต้อง
   - **Virtual & Override Usage:** มีการใช้ `virtual` ใน Base Class และ `override` ใน Derived Class ครบถ้วนตามสเปก
 
-- Problem 02: LinkedList Sorting (50 คะแนน)
-  - **SortAscending Correctness (25 คะแนน):** จัดเรียงลำดับจากน้อยไปมากถูกต้องตาม Test Cases
-  - **SortDescending Correctness (25 คะแนน):** จัดเรียงลำดับจากมากไปน้อยถูกต้องตาม Test Cases
-  - ทั้งนี้การ run test cases ผ่านทุก case ไม่ได้ยืนยัน 100% ว่าจะถูกต้อง เนื่องจากทางอาจารย์จะมี test case อีกชุดนึงที่ใช้ตรวจสอบอย่างละเอียดทั้งผลลัพธ์และรูปแบบการเขียน code
+- **Problem 02: LinkedList Sorting (40 คะแนน)**
+  - **SortAscending Correctness (20 คะแนน):** จัดเรียงลำดับจากน้อยไปมากถูกต้องตาม Test Cases
+  - **SortDescending Correctness (20 คะแนน):** จัดเรียงลำดับจากมากไปน้อยถูกต้องตาม Test Cases
+
+- **Problem 03: Turn-Based Queue Manipulation (20 คะแนน)**
+  - พัฒนาเมธอด `SwapQueue` สำหรับจัดการลำดับคิวในระบบ Turn-based ด้วย Doubly Linked List ได้อย่างถูกต้อง ครอบคลุมเงื่อนไข Edge Cases และรักษาความสมบูรณ์ของ Pointer สองทิศทาง (`Next` และ `Previous`) ครบถ้วนตาม Test Cases
+
+> [!NOTE]
+> ทั้งนี้การรัน Test Cases ผ่านทุก Case ไม่ได้ยืนยัน 100% ว่าจะได้คะแนนเต็ม เนื่องจากผู้สอนจะมี Test Cases ลับอีกชุดหนึ่งที่ใช้ตรวจสอบทั้งผลลัพธ์และความถูกต้องของกระบวนการเขียนโค้ด
 
 ---
 
@@ -402,9 +561,10 @@ namespace MidtermExam.Prob02
 ในโฟลเดอร์ `Assets/Midterm Exam/Tests/` มีชุดแบบทดสอบเตรียมไว้ให้นักศึกษาใช้ตรวจสอบความถูกต้องของโค้ด:
 - **`Prob01_ClassDiagram_Testcase.cs`** (13 Test Cases: `TC01` - `TC13`): ตรวจสอบโครงสร้างคลาสทั้งหมด 11 คลาสด้วย Reflection ครอบคลุมการมีอยู่ของคลาส, Inheritance Hierarchy, Access Modifiers (`public`, `protected`, `private`), ชนิดตัวแปร และการใช้ `virtual` / `override`
 - **`Prob02_Sorting_Testcase.cs`** (24 Test Cases: `TC01` - `TC24`): ตรวจสอบการเรียงลำดับ Linked List ครอบคลุม Edge Cases, SortAscending, SortDescending และ Extreme Cases พร้อมตรวจสอบความสมบูรณ์ของ Pointer สองทิศทาง (`Next` และ `Previous`) ทุกกรณี
+- **`Prob03_TurnQueue_Testcase.cs`** (12 Test Cases: `TC01` - `TC12`): ตรวจสอบการจัดการคิวเทิร์นด้วย Linked List ครอบคลุม Edge Cases, การสลับคิวทั่วไป, การย้ายตำแหน่งหัวคิว/ท้ายคิว, ความสมบูรณ์ของ Pointer สองทิศทาง และการจำลองระบบ Turn-based ในเกมจริง
 
 > [!TIP]
-> ชื่อของแต่ละ Test Case ใน Unity Test Runner ถูกตั้งชื่อให้ตรงกับตารางในเอกสารฉบับนี้ 100% เช่น `TC07_SortAsc_BasicUnsorted` ทำให้นักศึกษาสามารถค้นหาคำอธิบาย, ข้อมูลนำเข้า (Input) และผลลัพธ์ที่คาดหวัง (Expected Output) ได้อย่างง่ายดาย ทั้งในเอกสารนี้และใน Docstrings ของโค้ด Test Case
+> ชื่อของแต่ละ Test Case ใน Unity Test Runner ถูกตั้งชื่อให้ตรงกับตารางในเอกสารฉบับนี้ 100% เช่น `TC04_Swap_PromptExample_MovePlayer4AfterPlayer1` ทำให้นักศึกษาสามารถค้นหาคำอธิบาย, ข้อมูลนำเข้า (Input) และผลลัพธ์ที่คาดหวัง (Expected Output) ได้อย่างง่ายดาย ทั้งในเอกสารนี้และใน Docstrings ของโค้ด Test Case
 
 ### วิธีการเปิดและรัน Test Runner ใน Unity:
 1. เปิดหน้าต่าง **Unity Test Runner** โดยไปที่เมนู:
@@ -417,6 +577,7 @@ namespace MidtermExam.Prob02
 ---
 
 ## 💡 คำแนะนำเพิ่มเติมสำหรับนักศึกษา
-1. ตรวจสอบชื่อคลาส ชื่อตัวแปร และชื่อ method ให้ตรงกับ Class Diagram ทุกตัวอักษร (Case-sensitive)
+1. ตรวจสอบชื่อคลาส ชื่อตัวแปร และชื่อ method ให้ตรงกับ Class Diagram และโจทย์ทุกตัวอักษร (Case-sensitive)
 2. เมื่อเขียนโค้ดเสร็จ ให้ตรวจสอบแท็บ Console ใน Unity Editor เพื่อให้แน่ใจว่าไม่มีข้อผิดพลาดสีแดง (Compilation Error)
 3. รัน Unity Test Runner ตลอดระหว่างทำข้อสอบเพื่อประเมินความคืบหน้าของตนเอง และเพื่อให้มั่นใจว่าไม่เกิด regression bug (แก้ที่ใหม่ย้อนกลับมาทำให้เกิด bug กับส่วนที่ทำก่อนหน้า)
+
